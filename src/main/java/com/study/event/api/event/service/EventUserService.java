@@ -16,7 +16,7 @@ import javax.mail.internet.MimeMessage;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-//@Transactional
+@Transactional
 public class EventUserService {
 
     @Value("${study.mail.host}")
