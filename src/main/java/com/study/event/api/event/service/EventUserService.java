@@ -31,8 +31,10 @@ public class EventUserService {
 
     // 이메일 전송 객체
     private final JavaMailSender mailSender;
+
     // 패스워드 암호화 객체
     private final PasswordEncoder encoder;
+
 
     // 이메일 중복확인 처리
     public boolean checkEmailDuplicate(String email) {
@@ -165,11 +167,11 @@ public class EventUserService {
                         () -> new RuntimeException("회원 정보가 존재하지 않습니다.")
                 );
 
-        // 데이터 반영(패스워드,가입시간)
+        // 데이터 반영 (패스워드, 가입시간)
         String password = dto.getPassword();
         String encodedPassword = encoder.encode(password); // 암호화
 
-        foundUser.confirm(password);
+        foundUser.confirm(encodedPassword);
         eventUserRepository.save(foundUser);
     }
 }
