@@ -1,5 +1,6 @@
 package com.study.event.api.event.service;
 
+
 import com.study.event.api.event.dto.request.EventSaveDto;
 import com.study.event.api.event.dto.response.EventDetailDto;
 import com.study.event.api.event.dto.response.EventOneDto;
@@ -34,24 +35,18 @@ public class EventService {
 
         Pageable pageable = PageRequest.of(pageNo - 1, 4);
 
-//        Page<Event> eventsPage = eventRepository.findEvents(pageable, sort, userId);
-
-        EventUser eventUser = eventUserRepository.findById(userId).orElseThrow();
-
-        List<Event> events = eventUser.getEventList();
+        Page<Event> eventsPage = eventRepository.findEvents(pageable, sort, userId);
 
         // 이벤트 목록
-//        List<Event> events = eventsPage.getContent();
+        List<Event> events = eventsPage.getContent();
 
         List<EventDetailDto> eventDtoList = events
                 .stream().map(EventDetailDto::new)
                 .collect(Collectors.toList());
 
         // 총 이벤트 개수
-//        long totalElements = eventsPage.getTotalElements();
+        long totalElements = eventsPage.getTotalElements();
 
-        long totalElements = 100;
-        
         Map<String, Object> map = new HashMap<>();
         map.put("events", eventDtoList);
         map.put("totalCount", totalElements);
@@ -62,6 +57,7 @@ public class EventService {
     // 이벤트 등록
     public void saveEvent(EventSaveDto dto, String userId) {
 
+        // 로그인한 회원 정보 조회
         EventUser eventUser = eventUserRepository.findById(userId).orElseThrow();
 
         Event newEvent = dto.toEntity();
