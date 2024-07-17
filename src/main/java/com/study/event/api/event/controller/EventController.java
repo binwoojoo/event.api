@@ -7,6 +7,7 @@ import com.study.event.api.event.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,7 @@ public class EventController {
             return ResponseEntity.badRequest().body("sort 파라미터가 없당게");
         }
 
-        Map<String, Object> events = eventService.getEvents(pageNo, sort, tokenUserInfo.getUserId() );
+        Map<String, Object> events = eventService.getEvents(pageNo, sort, tokenUserInfo.getUserId());
 
         // 의도적으로 2초간의 로딩을 설정
 //        Thread.sleep(1000);
@@ -50,12 +51,13 @@ public class EventController {
             // JwtAuthFIlter에서 시큐리티에 등록한 데이터
             @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
             @RequestBody EventSaveDto dto) {
-        eventService.saveEvent(dto,tokenUserInfo.getUserId());
+        eventService.saveEvent(dto, tokenUserInfo.getUserId());
 
         return ResponseEntity.ok().body("saved");
     }
 
     // 단일 조회 요청
+    @PreAuthorize("hasAuthority('PREMIUM') or hasAuthority('ADMIN')" )
     @GetMapping("/{eventId}")
     public ResponseEntity<?> getEvent(@PathVariable Long eventId) {
 
