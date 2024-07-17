@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static com.study.event.api.auth.TokenProvider.*;
+
 // 클라이언트가 요청에 포함한 토큰정보를 검사하는 필터
 @Component
 @Slf4j
@@ -40,24 +42,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             log.info("토큰 위조 검사 필터 작동!");
             if (token != null) {
                 // 토큰 위조 검사
-                String userId = tokenProvider.validateAndGetTokenInfo(token);
+                TokenUserInfo tokenInfo = tokenProvider.validateAndGetTokenInfo(token);
 
                 // 인증 완료 처리
                 /*
                     스프링 시큐리티에게 인증완료 상황을 전달하여
                     403 상태코드 대신 정상적인 흐름을 이어갈 수 있도록
                 */
-                AbstractAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        userId, // 인증 완료 후 컨트롤러에서 사용할 정보
-                        null, // 인증된 사용자의 패스워드 - 보통 null로 둠
-                        new ArrayList<>() // 인가정보 리스트
-                );
+                AbstractAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                tokenInfo, // 인증 완료 후 컨트롤러에서 사용할 정보
+                                null, // 인증된 사용자의 패스워드 - 보통 null로 둠
+                                new ArrayList<>() // 인가정보 리스트
+                        );
 
                 // 인증 완료시 클라이언트의 요청 정보들을 세팅
                 auth.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
-                
+
                 // 스프링 시큐리티에게 인증이 끝났다는 사실을 전달
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
