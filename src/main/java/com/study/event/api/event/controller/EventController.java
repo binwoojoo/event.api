@@ -51,13 +51,20 @@ public class EventController {
             // JwtAuthFIlter에서 시큐리티에 등록한 데이터
             @AuthenticationPrincipal TokenUserInfo tokenUserInfo,
             @RequestBody EventSaveDto dto) {
-        eventService.saveEvent(dto, tokenUserInfo.getUserId());
+        try {
+            eventService.saveEvent(dto, tokenUserInfo.getUserId());
 
-        return ResponseEntity.ok().body("saved");
+            return ResponseEntity.ok().body("saved");
+        } catch (IllegalStateException e) {
+
+            log.warn(e.getMessage());
+
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
     }
 
     // 단일 조회 요청
-    @PreAuthorize("hasAuthority('PREMIUM') or hasAuthority('ADMIN')" )
+    @PreAuthorize("hasAuthority('PREMIUM') or hasAuthority('ADMIN')")
     @GetMapping("/{eventId}")
     public ResponseEntity<?> getEvent(@PathVariable Long eventId) {
 
