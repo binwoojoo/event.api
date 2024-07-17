@@ -42,6 +42,7 @@ public class EventUserService {
     // 토큰 생성 객체
     private final TokenProvider tokenProvider;
 
+
     // 이메일 중복확인 처리
     public boolean checkEmailDuplicate(String email) {
 
@@ -206,6 +207,7 @@ public class EventUserService {
     }
 
 
+
     // 회원 인증 처리 (login)
     public LoginResponseDto authenticate(final LoginRequestDto dto) {
 
@@ -240,7 +242,24 @@ public class EventUserService {
                 .role(eventUser.getRole().toString())
                 .token(token)
                 .build();
-
     }
 
+    // 등업 처리
+    public LoginResponseDto promoteToPremium(String userId) {
+        // 회원 탐색
+        EventUser eventUser = eventUserRepository.findById(userId).orElseThrow();
+
+        // 등급 변경
+        eventUser.promoteToPremium();
+        EventUser promotedUser = eventUserRepository.save(eventUser);
+
+        // 토큰 재발급
+        String token = tokenProvider.createToken(promotedUser);
+
+        return LoginResponseDto.builder()
+                .token(token)
+                .role(promotedUser.getRole().toString())
+                .email(promotedUser.getEmail())
+                .build();
+    }
 }
